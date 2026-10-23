@@ -139,11 +139,11 @@ export default function AddAssetModal({
                 <input type="date" className="w-full p-2 border rounded-lg text-sm" value={formData.lease_end} onChange={e => setFormData({...formData, lease_end: e.target.value})} />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Monthly Rent ($)</label>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Monthly Rent (Rp.)</label>
                 <input type="number" className="w-full p-2 border rounded-lg text-sm" value={formData.monthly_rent} onChange={e => setFormData({...formData, monthly_rent: e.target.value})} />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Security Deposit ($)</label>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Security Deposit (Rp.)</label>
                 <input type="number" className="w-full p-2 border rounded-lg text-sm" value={formData.security_deposit} onChange={e => setFormData({...formData, security_deposit: e.target.value})} />
               </div>
             </div>

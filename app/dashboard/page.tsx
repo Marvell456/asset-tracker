@@ -113,9 +113,9 @@ export default function Dashboard() {
       {/* KPI Cards (Removed Review Items, changed to 3 columns) */}
       <div className="grid grid-cols-3 gap-4 mb-8">
         {[
-          { title: 'Portfolio Assets', val: `${totalUnits} Units`, sub: '$14,240,000 Valuation' },
+          { title: 'Portfolio Assets', val: `${totalUnits} Units`, sub: 'Rp.14,240,000 Valuation' },
           { title: 'Occupancy Yield', val: `${occupancyYield}%`, sub: `${occupiedUnits} Leased • ${totalUnits - occupiedUnits} Vacant` },
-          { title: 'Monthly Inflow', val: `$${monthlyInflow.toLocaleString()}`, sub: '+4.2% YoY' },
+          { title: 'Monthly Inflow', val: `Rp.${monthlyInflow.toLocaleString()}`, sub: '+4.2% YoY' },
         ].map((kpi, i) => (
           <div key={i} className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
             <p className="text-xs text-gray-500 uppercase font-semibold mb-2">{kpi.title}</p>
@@ -174,7 +174,7 @@ export default function Dashboard() {
                 </div>
                 <div>
                   <p className="text-xs font-bold text-gray-500 uppercase mb-2">Financials</p>
-                  <p className="text-gray-900">Rent: ${asset.monthly_rent}/mo • Deposit: ${asset.security_deposit}</p>
+                  <p className="text-gray-900">Rent: Rp.{asset.monthly_rent.toLocaleString()}/mo • Deposit: Rp.{asset.security_deposit.toLocaleString()}</p>
                 </div>
               </div>
             )}
