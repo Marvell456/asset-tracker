@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { google } from 'googleapis';
 import { createClient } from '@supabase/supabase-js';
+import { addDays, format, parseISO } from 'date-fns'; // ADD THIS IMPORT
 
 export const dynamic = 'force-dynamic';
 
@@ -21,7 +22,6 @@ export async function GET() {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
-    // Fetch ALL assets that have a lease_end date set
     const { data: assets, error } = await supabase
       .from('assets')
       .select('*')
@@ -34,21 +34,22 @@ export async function GET() {
 
     const results = [];
     for (const asset of assets) {
+      // Calculate the next day for the end date
+      const endDate = format(addDays(parseISO(asset.lease_end), 1), 'yyyy-MM-dd');
+
       const event = {
         summary: `Lease Ending: ${asset.name}`,
         description: `Tenant: ${asset.tenant_name || 'N/A'}\nContact: ${asset.tenant_contact || 'N/A'}\nAddress: ${asset.address}\n\nView Asset: ${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
         start: { date: asset.lease_end, timeZone: 'UTC' },
-        end: { date: asset.lease_end, timeZone: 'UTC' },
+        end: { date: endDate, timeZone: 'UTC' }, // Use the next day here
         reminders: { useDefault: false, overrides: [{ method: 'email', minutes: 24 * 60 }] },
       };
 
       let eventId = asset.google_event_id;
 
       if (eventId) {
-        // Update existing event
         await calendar.events.update({ calendarId, eventId, requestBody: event });
       } else {
-        // Create new event
         const res = await calendar.events.insert({ calendarId, requestBody: event });
         eventId = res.data.id;
         await supabase.from('assets').update({ google_event_id: eventId }).eq('id', asset.id);

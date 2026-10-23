@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { google } from 'googleapis';
 import { createClient } from '@supabase/supabase-js';
+import { addDays, format, parseISO } from 'date-fns'; // ADD THIS IMPORT
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -30,32 +31,30 @@ export async function POST(req: Request) {
     // Handle Upsert (Add or Edit)
     if (action === 'upsert') {
       
-      // If an end date exists, create or update the calendar event
       if (asset.lease_end) {
+        // Calculate the next day for the end date
+        const endDate = format(addDays(parseISO(asset.lease_end), 1), 'yyyy-MM-dd');
+
         const event = {
           summary: `Lease Ending: ${asset.name}`,
           description: `Tenant: ${asset.tenant_name || 'N/A'}\nContact: ${asset.tenant_contact || 'N/A'}\nAddress: ${asset.address}\n\nView Asset: ${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
           start: { date: asset.lease_end, timeZone: 'UTC' },
-          end: { date: asset.lease_end, timeZone: 'UTC' },
+          end: { date: endDate, timeZone: 'UTC' }, // Use the next day here
           reminders: { useDefault: false, overrides: [{ method: 'email', minutes: 24 * 60 }] },
         };
 
         let eventId = asset.google_event_id;
 
         if (eventId) {
-          // Update existing event
           await calendar.events.update({ calendarId, eventId, requestBody: event });
         } else {
-          // Create new event
           const res = await calendar.events.insert({ calendarId, requestBody: event });
           eventId = res.data.id;
         }
 
-        // Save the event ID back to Supabase
         await supabaseAdmin.from('assets').update({ google_event_id: eventId }).eq('id', asset.id);
         return NextResponse.json({ success: true, eventId });
       } 
-      // If the user cleared the end date, delete the calendar event
       else if (asset.google_event_id) {
         await calendar.events.delete({ calendarId, eventId: asset.google_event_id });
         await supabaseAdmin.from('assets').update({ google_event_id: null }).eq('id', asset.id);
